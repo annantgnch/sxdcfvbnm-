@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доставка Еды - Идеальный Прототип</title>
+    
+    <style>
+        /* === ЦВЕТОВАЯ ПАЛИТРА === */
+        :root {
+            --primary-orange: #f39c12; /* Основной оранжевый */
+            --primary-orange-hover: #d68910;
+            --secondary-blue: #e0f2fe; /* Нежно-голубой */
+            --secondary-blue-dark: #bae6fd; /* Голубой чуть темнее для границ */
+            --text-main: #333333; /* Основной текст */
+            --text-muted: #666666;
+            --bg-page: #f8fafc; /* Очень светлый фон страницы */
+            --white: #ffffff;
+        }
+
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: var(--bg-page); 
+            color: var(--text-main);
+        }
+        
+        .screen { display: none; padding: 20px; padding-bottom: 100px; }
+        .screen.active { display: block; }
+
+        /* Шапка */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px;
+            background: var(--secondary-blue);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid var(--primary-orange);
+        }
+        h1 { font-size: 22px; margin: 0; color: var(--text-main); }
+        h2 { font-size: 18px; margin-top: 0; color: var(--text-main); }
+
+        /* Карточки (Блюда, Заказы) */
+        .card {
+            background: var(--white); 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border: 1px solid var(--secondary-blue-dark);
+            transition: 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: var(--primary-orange);
+        }
+        .card-info h3 { margin: 0 0 5px 0; font-size: 16px; color: var(--text-main);}
+        .card-info p { margin: 0; color: var(--primary-orange); font-weight: bold;}
+        
+        /* Кнопки */
+        .btn { 
+            border: none; 
+            padding: 10px 15px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: bold; 
+            transition: 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+        
+        .btn-main { 
+            background: var(--primary-orange); 
+            color: var(--white); 
+            width: 100%; 
+            margin-top: 15px; 
+            font-size: 16px; 
+            padding: 12px;
+        }
+        .btn-main:hover { background: var(--primary-orange-hover); }
+        
+        .btn-add { background: var(--primary-orange); color: var(--white); }
+        .btn-add:hover { background: var(--primary-orange-hover); }
+        
+        .btn-danger { background: #e74c3c; color: var(--white); padding: 8px 12px;}
+        
+        .btn-small { padding: 5px 10px; font-size: 12px; }
+        .btn-outline { 
+            background: var(--secondary-blue); 
+            border: 1px solid var(--secondary-blue-dark); 
+            color: var(--primary-orange); 
+            font-weight: bold;
+        }
+        .btn-outline:hover { background: var(--secondary-blue-dark); }
+
+        /* Формы */
+        .form-group { 
+            display: flex; 
+            flex-direction: column; 
+            background: var(--white); 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 15px;
+            border: 1px solid var(--secondary-blue-dark);
+        }
+        .form-group label { margin-top: 10px; font-weight: bold; font-size: 14px; color: var(--text-main);}
+        .form-group input, .form-group select { 
+            padding: 10px; 
+            margin-top: 5px; 
+            border: 1px solid var(--secondary-blue-dark); 
+            border-radius: 5px; 
+            font-size: 16px;
+            background: var(--secondary-blue);
+            color: var(--text-main);
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+            background: var(--white);
+        }
+
+        /* Нижнее меню (Оранжевое) */
+        .bottom-nav {
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            background: var(--primary-orange); 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 15px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.15); 
+            box-sizing: border-box; 
+            z-index: 100;
+        }
+        .bottom-nav button { 
+            border: none; 
+            background: none; 
+            font-size: 16px; 
+            cursor: pointer; 
+            color: var(--white); 
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .bottom-nav button:hover { 
+            color: #333333; 
+            transform: translateY(-2px);
+        }
+
+        /* Модальное окно */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center;}
+        .modal.active { display: flex; }
+        .modal-content { 
+            background: var(--white); 
+            width: 90%; max-width: 400px; padding: 20px; 
+            border-radius: 10px; max-height: 80vh; overflow-y: auto;
+            border-top: 5px solid var(--primary-orange);
+        }
+        
+        /* Оформление состава заказа */
+        .order-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--secondary-blue);}
+        .order-total { display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-top: 15px; color: var(--text-main);}
+
+        .text-orange { color: var(--primary-orange) !important; }
+    </style>
+</head>
+<body>
+    
+    <!-- ================= ЭКРАН 1: ГЛАВНАЯ (МЕНЮ) ================= -->
+    <div id="homeScreen" class="screen active">
+        <div class="header">
+            <h1>Меню ресторанов</h1>
+            <button class="btn btn-add" onclick="showScreen('addDishScreen')">+ Блюдо</button>
+        </div>
+        <div id="dishesList"></div>
+    </div>
+
+    <!-- ================= ЭКРАН 2: ЗАКАЗЫ ================= -->
+    <div id="cartScreen" class="screen">
+        <div class="header">
+            <h1>Мои заказы</h1>
+            <button class="btn btn-outline" onclick="showScreen('addOrderScreen')">+ Новый заказ</button>
+        </div>
+        <div id="ordersList"></div>
+    </div>
+
+    <!-- ================= ЭКРАН 3: ПРОФИЛЬ ================= -->
+    <div id="profileScreen" class="screen">
+        <h1>Профиль</h1>
+        <div class="form-group">
+            <label>Имя (name):</label>
+            <input type="text" id="userName">
+            <label>Телефон (phone):</label>
+            <input type="text" id="userPhone">
+            <label>Email:</label>
+            <input type="email" id="userEmail">
+            <button class="btn btn-main" onclick="saveProfile()">Сохранить изменения</button>
+        </div>
+    </div>
+
+    <!-- ================= ЭКРАН 4: ДОБАВЛЕНИЕ БЛЮДА ================= -->
+    <div id="addDishScreen" class="screen">
+        <h1>Добавление блюда</h1>
+        <form class="form-group" onsubmit="handleAddDish(event)">
+            <label>Категория (category_id):</label>
+            <select id="dishCategory"></select>
+            
+            <label>Название (name):</label>
+            <input type="text" id="dishName" required placeholder="Например: Суши Филадельфия или Кола">
+            
+            <label>Цена (price):</label>
+            <input type="number" id="dishPrice" required placeholder="450">
+
+            <label>Описание (description):</label>
+            <input type="text" id="dishDesc" placeholder="Лосось, сыр, рис...">
+            
+            <button type="submit" class="btn btn-main">Добавить в меню</button>
+        </form>
+    </div>
+
+    <!-- ================= ЭКРАН 5: СОЗДАНИЕ ЗАКАЗА ================= -->
+    <div id="addOrderScreen" class="screen">
+        <h1>Новый заказ</h1>
+        <p style="color: var(--text-muted); font-size: 14px;">Выберите позиции из меню:</p>
+        <div id="orderConstructorList"></div>
+        <button class="btn btn-main" onclick="finalizeOrder()">Оформить заказ</button>
+    </div>
+
+    <!-- ================= МОДАЛЬНОЕ ОКНО: ДЕТАЛИ ЗАКАЗА ================= -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalOrderTitle">Заказ №...</h2>
+            <p style="font-size:12px; color:var(--text-muted);" id="modalOrderDate"></p>
+            <hr style="border:0; border-top:1px solid var(--secondary-blue-dark);">
+            <div id="modalOrderItems"></div>
+            <div class="order-total">
+                <span>Итого:</span>
+                <span id="modalOrderTotal" class="text-orange">0 ₽</span>
+            </div>
+            <button class="btn btn-main" onclick="closeModal()">Закрыть</button>
+            <button class="btn btn-danger" style="width: 100%; margin-top: 10px;" onclick="deleteOrder()">Удалить заказ</button>
+        </div>
+    </div>
+
+    <!-- ================= НАВИГАЦИЯ ================= -->
+    <nav class="bottom-nav">
+        <button onclick="showScreen('homeScreen')">🏠 Меню</button>
+        <button onclick="showScreen('cartScreen')">🛒 Заказы</button>
+        <button onclick="showScreen('profileScreen')">👤 Профиль</button>
+    </nav>
+
+    <script>
+        // ==========================================
+        // 1. ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ
+        // ==========================================
+        // ВАЖНО: Изменена версия ключа на v3, чтобы браузер сбросил старые данные (Пицца/Бургеры)
+        let db = JSON.parse(localStorage.getItem('foodDeliveryDB_v3'));
+
+        if (!db) {
+            db = {
+                users: [{ id: 1, name: "Иван", phone: "+7 999 123-45-67", email: "ivan@mail.ru" }],
+                categories: [
+                    { id: 1, name: "Еда" },      // <-- Изменено
+                    { id: 2, name: "Напитки" }   // <-- Изменено
+                ],
+                dishes: [
+                    { id: 1, category_id: 1, name: "Пицца Маргарита", price: 500, description: "Сыр, томаты" },
+                    { id: 2, category_id: 2, name: "Кола", price: 150, description: "0.5 л" } // <-- Добавлен пример напитка
+                ],
+                orders: [],
+                orderItems: []
+            };
+            saveDB();
+        }
+
+        function saveDB() {
+            localStorage.setItem('foodDeliveryDB_v3', JSON.stringify(db));
+            renderDishes();
+            renderOrders();
+        }
+
+        // ==========================================
+        // 2. НАВИГАЦИЯ
+        // ==========================================
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            
+            if (screenId === 'profileScreen') loadProfile();
+            if (screenId === 'addOrderScreen') renderOrderConstructor();
+            if (screenId === 'addDishScreen') renderCategorySelect();
+        }
+
+        // ==========================================
+        // 3. РАБОТА С БЛЮДАМИ (DISHES)
+        // ==========================================
+        function renderDishes() {
+            const container = document.getElementById('dishesList');
+            container.innerHTML = ''; 
+
+            db.dishes.forEach(dish => {
+                const cat = db.categories.find(c => c.id === dish.category_id);
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                    <div class="card-info">
+                        <h3>${dish.name}</h3>
+                        <small style="color:var(--text-muted)">${cat ? cat.name : 'Без категории'}</small>
+                        <p>${dish.price} ₽</p>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderCategorySelect() {
+            const select = document.getElementById('dishCategory');
+            select.innerHTML = '';
+            db.categories.forEach(cat => {
+                select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+            });
+        }
+
+        function handleAddDish(event) {
+            event.preventDefault(); 
+            const newDish = {
+                id: Date.now(), 
+                category_id: Number(document.getElementById('dishCategory').value),
+                name: document.getElementById('dishName').value,
+                price: Number(document.getElementById('dishPrice').value),
+                description: document.getElementById('dishDesc').value
+            };
+            
+            db.dishes.push(newDish);
+            saveDB();
+            
+            event.target.reset();
+            showScreen('homeScreen');
+        }
+
+        // ==========================================
+        // 4. РАБОТА С ЗАКАЗАМИ
+        // ==========================================
+        function renderOrders() {
+            const container = document.getElementById('ordersList');
+            if(db.orders.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align:center;">Заказов пока нет</p>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            [...db.orders].reverse().forEach(order => {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.style.cursor = 'pointer';
+                div.onclick = () => openOrderDetails(order.id);
+                div.innerHTML = `
+                    <div class="card-info">
+                        <h3>Заказ №${order.id.toString().slice(-4)}</h3>
+                        <small style="color:var(--text-muted)">${order.order_date} | Статус: <b>${order.status}</b></small>
+                    </div>
+                    <div style="font-weight:bold; color:var(--primary-orange);">${order.total_price} ₽</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderOrderConstructor() {
+            const container = document.getElementById('orderConstructorList');
+            container.innerHTML = '';
+            db.dishes.forEach(dish => {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                    <div class="card-info">
+                        <h3>${dish.name}</h3>
+                        <p>${dish.price} ₽</p>
+                    </div>
+                    <button class="btn btn-add btn-small" onclick="quickAddToOrder(${dish.id})">+ Добавить</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        let currentCart = []; 
+        function quickAddToOrder(dishId) {
+            const existingItem = currentCart.find(item => item.dish_id === dishId);
+            if(existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                currentCart.push({ dish_id: dishId, quantity: 1 });
+            }
+            alert("Позиция добавлена в черновик заказа!");
+        }
+
+        function finalizeOrder() {
+            if(currentCart.length === 0) {
+                alert("Вы не выбрали ни одной позиции!");
+                return;
+            }
+
+            let total = 0;
+            currentCart.forEach(item => {
+                const dish = db.dishes.find(d => d.id === item.dish_id);
+                total += dish.price * item.quantity;
+            });
+
+            const newOrderId = Date.now();
+            const newOrder = {
+                id: newOrderId,
+                user_id: db.users[0].id,
+                order_date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
+                status: "В обработке",
+                total_price: total
+            };
+            db.orders.push(newOrder);
+
+            currentCart.forEach(item => {
+                db.orderItems.push({
+                    id: Date.now() + Math.random(),
+                    order_id: newOrderId,
+                    dish_id: item.dish_id,
+                    quantity: item.quantity
+                });
+            });
+
+            saveDB();
+            currentCart = []; 
+            showScreen('cartScreen');
+            alert("Заказ успешно оформлен!");
+        }
+
+        // ==========================================
+        // 5. МОДАЛЬНОЕ ОКНО
+        // ==========================================
+        let activeOrderId = null;
+
+        function openOrderDetails(orderId) {
+            activeOrderId = orderId;
+            const order = db.orders.find(o => o.id === orderId);
+            const items = db.orderItems.filter(oi => oi.order_id === orderId);
+            
+            document.getElementById('modalOrderTitle').innerText = `Заказ №${order.id.toString().slice(-4)}`;
+            document.getElementById('modalOrderDate').innerText = `${order.order_date} | Статус: ${order.status}`;
+            
+            const container = document.getElementById('modalOrderItems');
+            container.innerHTML = '';
+
+            items.forEach(oi => {
+                const dish = db.dishes.find(d => d.id === oi.dish_id);
+                if(!dish) return;
+                
+                const row = document.createElement('div');
+                row.className = 'order-item-row';
+                row.innerHTML = `
+                    <div>
+                        <b>${dish.name}</b><br>
+                        <small style="color:var(--text-muted)">${dish.price} ₽ x ${oi.quantity}</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline btn-small" onclick="updateItemQty(${oi.id}, 1)">+</button>
+                        <button class="btn btn-outline btn-small" onclick="updateItemQty(${oi.id}, -1)">-</button>
+                        <button class="btn btn-danger btn-small" onclick="removeItem(${oi.id})">✖</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            document.getElementById('modalOrderTotal').innerText = order.total_price + ' ₽';
+            document.getElementById('orderModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('orderModal').classList.remove('active');
+            activeOrderId = null;
+        }
+
+        function updateItemQty(itemId, change) {
+            const item = db.orderItems.find(oi => oi.id === itemId);
+            if(!item) return;
+            
+            item.quantity += change;
+            
+            if(item.quantity <= 0) {
+                removeItem(itemId);
+                return;
+            }
+            
+            recalculateOrderTotal(activeOrderId);
+        }
+
+        function removeItem(itemId) {
+            db.orderItems = db.orderItems.filter(oi => oi.id !== itemId);
+            recalculateOrderTotal(activeOrderId);
+        }
+
+        function deleteOrder() {
+            if(!confirm("Вы уверены, что хотите удалить заказ?")) return;
+            db.orders = db.orders.filter(o => o.id !== activeOrderId);
+            db.orderItems = db.orderItems.filter(oi => oi.order_id !== activeOrderId);
+            saveDB();
+            closeModal();
+        }
+
+        function recalculateOrderTotal(orderId) {
+            const items = db.orderItems.filter(oi => oi.order_id === orderId);
+            const order = db.orders.find(o => o.id === orderId);
+            
+            let newTotal = 0;
+            items.forEach(oi => {
+                const dish = db.dishes.find(d => d.id === oi.dish_id);
+                if(dish) newTotal += dish.price * oi.quantity;
+            });
+
+            order.total_price = newTotal;
+            saveDB(); 
+            openOrderDetails(orderId);
+        }
+
+        // ==========================================
+        // 6. ПРОФИЛЬ
+        // ==========================================
+        function loadProfile() {
+            document.getElementById('userName').value = db.users[0].name;
+            document.getElementById('userPhone').value = db.users[0].phone;
+            document.getElementById('userEmail').value = db.users[0].email;
+        }
+
+        function saveProfile() {
+            db.users[0].name = document.getElementById('userName').value;
+            db.users[0].phone = document.getElementById('userPhone').value;
+            db.users[0].email = document.getElementById('userEmail').value;
+            saveDB();
+            alert("Данные профиля обновлены!");
+        }
+
+        renderDishes();
+        renderOrders();
+    </script>
+</body>
+</html>
